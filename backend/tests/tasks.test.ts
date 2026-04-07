@@ -9,10 +9,11 @@ jest.mock('../src/models/db', () => ({
 
 import { pool } from '../src/models/db';
 const mockPool = pool as jest.Mocked<typeof pool>;
+const secret = process.env.JWT_SECRET || 'limi_super_secret_jwt_key_2024';
 
 const token = jwt.sign(
   { id: 'user-123', email: 'test@test.com', name: 'Wasi' },
-  'limi_super_secret_jwt_key_2024'
+  secret
 );
 
 describe('Task Controller', () => {
