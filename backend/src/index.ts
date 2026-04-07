@@ -7,33 +7,46 @@ import { initDB } from './models/db';
 import routes from './routes';
 import { initSocket } from './socket';
 
-// ... baqi saari imports same raheingi
-
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
 
-// ... middleware aur socket initialization same rahega
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    credentials: true,
+  },
+});
+
+// Middleware
+app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173', credentials: true }));
+app.use(express.json());
+
+// Health check
+app.get('/health', (_, res) => res.json({ status: 'OK', timestamp: new Date().toISOString() }));
+
+// API Routes
+app.use('/api', routes);
+
+// Socket.io
+initSocket(io);
 
 const PORT = process.env.PORT || 5000;
 
-// FIX: Is condition ke baghair tests crash honge
-if (process.env.NODE_ENV !== 'test') {
-  const start = async () => {
-    try {
-      await initDB();
-      server.listen(PORT, () => {
-        console.log(`🚀 Server running on http://localhost:${PORT}`);
-      });
-    } catch (err) {
-      console.error('Failed to start server:', err);
-      process.exit(1);
-    }
-  };
-  start();
-}
+const start = async () => {
+  try {
+    await initDB();
+    server.listen(PORT, () => {
+      console.log(`🚀 Server running on http://localhost:${PORT}`);
+    });
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
+};
 
-// Export 'app' for supertest and 'server' for potential socket tests
+start();
 export default app;
 export { server };
