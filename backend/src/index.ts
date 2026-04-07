@@ -35,4 +35,5 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 // Export 'app' for supertest and 'server' for potential socket tests
-export { app, server };
+export default app;
+export { server };
