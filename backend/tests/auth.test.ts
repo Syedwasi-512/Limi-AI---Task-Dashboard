@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app  from '../src/index';
+import server from '../src/index'; // Humne 'server' import kiya hai
 
 // Mock the database
 jest.mock('../src/models/db', () => ({
@@ -17,7 +17,8 @@ describe('Auth Controller', () => {
 
   describe('POST /api/auth/register', () => {
     it('should return 400 if fields are missing', async () => {
-      const res = await request(app)
+      // FIX: 'app' ko 'server' kar diya
+      const res = await request(server)
         .post('/api/auth/register')
         .send({ email: 'test@test.com' });
       expect(res.status).toBe(400);
@@ -26,7 +27,7 @@ describe('Auth Controller', () => {
 
     it('should return 409 if email already exists', async () => {
       (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ id: '123' }] });
-      const res = await request(app)
+      const res = await request(server)
         .post('/api/auth/register')
         .send({ name: 'Test', email: 'existing@test.com', password: 'pass123' });
       expect(res.status).toBe(409);
@@ -36,9 +37,9 @@ describe('Auth Controller', () => {
     it('should register successfully with valid data', async () => {
       (mockPool.query as jest.Mock)
         .mockResolvedValueOnce({ rows: [] }) // no existing user
-        .mockResolvedValueOnce({ rows: [{ id: 'uuid-123', name: 'Wasi', email: 'wasi@test.com' }] });
+        .mockResolvedValueOnce({ rows: [{ id: 'uuid-123', name: 'Wasi', email: 'wasi@test.com', password: '$2b$10$hashedpassword' }] });
 
-      const res = await request(app)
+      const res = await request(server)
         .post('/api/auth/register')
         .send({ name: 'Wasi', email: 'wasi@test.com', password: 'password123' });
 
@@ -50,7 +51,7 @@ describe('Auth Controller', () => {
 
   describe('POST /api/auth/login', () => {
     it('should return 400 if fields are missing', async () => {
-      const res = await request(app)
+      const res = await request(server)
         .post('/api/auth/login')
         .send({ email: 'test@test.com' });
       expect(res.status).toBe(400);
@@ -58,7 +59,7 @@ describe('Auth Controller', () => {
 
     it('should return 401 for invalid credentials', async () => {
       (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
-      const res = await request(app)
+      const res = await request(server)
         .post('/api/auth/login')
         .send({ email: 'wrong@test.com', password: 'wrongpass' });
       expect(res.status).toBe(401);
