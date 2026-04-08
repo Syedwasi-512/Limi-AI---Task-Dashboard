@@ -38,11 +38,12 @@ services:
     restart: unless-stopped
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:5000/api
+        VITE_SOCKET_URL: http://localhost:5000
     container_name: limi_frontend
-    environment:
-      VITE_API_URL: http://localhost:5000/api
-      VITE_SOCKET_URL: http://localhost:5000
     ports:
       - '5173:80'
     depends_on:
