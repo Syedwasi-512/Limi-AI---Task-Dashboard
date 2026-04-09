@@ -96,28 +96,3 @@ jobs:
           build-args: |
             VITE_API_URL=${{ secrets.VITE_API_URL }}
             VITE_SOCKET_URL=${{ secrets.VITE_SOCKET_URL }}
-
-  # ─────────────────────────────────────────
-  # STEP 4: Deploy to Railway
-  # ─────────────────────────────────────────
-  deploy-railway:
-    name: 🚀 Deploy to Railway
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
-
-      - name: Deploy Backend to Railway
-        run: railway up --service limi-backend --detach
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-
-      - name: Deploy Frontend to Railway
-        run: railway up --service limi-frontend --detach
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
